@@ -59,13 +59,15 @@ class LungSegmentationModel(nn.Module):
         super(LungSegmentationModel, self).__init__()
         self.upsample = nn.Upsample(size=(input_height, input_width), mode='bilinear', align_corners=True)
         self.conv = nn.Conv2d(2048, num_classes, kernel_size=1)
+        self.activation = nn.Sigmoid()
 
     def forward(self, x):
         upsampled_features = self.upsample(x)
         mask = self.conv(upsampled_features)
-        threshold = 0.5
-        binary_mask = (mask > threshold).float()
-        return binary_mask
+        #threshold = 0.5
+        #binary_mask = (mask > threshold).float()
+        mask = self.activation(mask)
+        return mask
 
 class MultiTaskModel(nn.Module):
     def __init__(self, input_height, input_width, in_channels, num_classes_classification, num_classes_cancer):
