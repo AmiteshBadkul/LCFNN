@@ -69,12 +69,12 @@ class LungSegmentationDataset(Dataset):
     def __getitem__(self, idx):
         file_name = self.image_paths[idx]
         image_path = os.path.join(self.image_dir, file_name)
-        image_path = image_path.replace("\\", "/")
+        #image_path = image_path.replace("\\", "/")
 
         base_filename = os.path.splitext(file_name)[0]
         mask_filename = base_filename + '_mask.png'
         mask_path = os.path.join(self.mask_dir, mask_filename)
-        mask_path = mask_path.replace("\\", "/")
+        #mask_path = mask_path.replace("\\", "/")
 
         image = Image.open(image_path).convert('RGB')
         image = self.transform(image)

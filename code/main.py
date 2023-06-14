@@ -1,6 +1,7 @@
 import argparse
 import torch
 import json
+import time
 from torch.utils.data import DataLoader
 
 ## own work
@@ -63,10 +64,10 @@ def main(args):
     optimizer = torch.optim.Adam(model.parameters(), lr=args.learning_rate, weight_decay = args.weight_decay)
     # # TODO: ADD LEARNING RATE SCHEDULAR LATER
 
-
     # Training loop
     for epoch in range(args.num_epochs):
         # Training
+        start_time = time.time()
         train_loss, train_covid_accuracy, train_cancer_accuracy, train_covid_f1, train_cancer_f1, train_seg_iou, train_seg_dice = train(model, zip(classification_dataloader, cancer_detection_dataloader,
                                                 segmentation_dataloader), criterion, optimizer, args.device)
         print('train_loss', train_loss)
@@ -76,6 +77,14 @@ def main(args):
         print('train_cancer_f1', train_cancer_f1)
         print('train_seg_iou', train_seg_iou)
         print('train_seg_dice', train_seg_dice)
+
+        # Measure GPU memory usage
+        gpu_memory_usage = torch.cuda.max_memory_allocated() / 1024 / 1024  # Convert to megabytes
+        print('\n')
+        end_time = time.time()
+        epoch_time = end_time - start_time
+        print('time taken for the epoch.....', epoch_time)
+        print('GPU memory usage.....', gpu_memory_usage)
 
         train_metrics['Loss'].append(train_loss)
         train_metrics['COVID19 Classification Accuracy'].append(train_covid_accuracy)
@@ -97,7 +106,7 @@ def main(args):
 
     df_new = pd.DataFrame(train_metrics)
     # Perform further actions with the metrics or save them to a file
-    train_metrics.to_csv(args.results_folder + 'metrics.csv')
+    df_new.to_csv(args.results_folder + 'metrics.csv')
 
 if __name__ == '__main__':
     print('training is starting.......')

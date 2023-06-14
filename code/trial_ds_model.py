@@ -50,8 +50,8 @@ loss_function = MultiTaskLoss(task_names, weighting_strategy='random')
 for epoch in range(EPOCHS):
     print(epoch)
     r1 = train(model, zip(classification_dataloader, cancer_detection_dataloader, segmentation_dataloader),
-               loss_function, optimizer, device = 'cuda')
+               loss_function, optimizer, device = 'cpu')
     r2 = evaluate(model, zip(classification_dataloader, cancer_detection_dataloader, segmentation_dataloader),
-               loss_function, device = 'cuda')
+               loss_function, device = 'cpu')
     print(r2)
     break
