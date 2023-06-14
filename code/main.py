@@ -83,8 +83,8 @@ def main(args):
         print('\n')
         end_time = time.time()
         epoch_time = end_time - start_time
-        print('time taken for the epoch.....', epoch_time)
-        print('GPU memory usage.....', gpu_memory_usage)
+        print('time taken for the epoch.....' +  str(epoch_time) + ' seconds')
+        print('GPU memory usage.....' + str(gpu_memory_usage) + ' MB')
 
         train_metrics['Loss'].append(train_loss)
         train_metrics['COVID19 Classification Accuracy'].append(train_covid_accuracy)
