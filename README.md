@@ -1,6 +1,6 @@
 # Lung Chest X-Ray Focused Neural Networks
 
-This repository contains a multi-task deep learning model for COVID-19 classification, lung cancer detection, and lung segmentation. The model is based on the ResNet-50 backbone and utilizes convolutional neural networks (CNNs) for the individual tasks. The main aim logic behind the same is to ensure
+This repository contains a multi-task deep learning model for COVID-19 classification, lung cancer detection, and lung segmentation. The model is based on the ResNet-50 backbone and utilizes convolutional neural networks (CNNs) for the individual tasks. In a multi-task learning setting, the significance of jointly training these tasks is to improve generalizability, learn efficient feature extraction, and effective usage of lesser data.
 
 ## Requirements
 
