@@ -49,6 +49,8 @@ def main(args):
         input_height=args.image_size,
         input_width=args.image_size,
         in_channels=IN_CHANNELS,  # Assuming RGB images
+        kernel_size_backbone = args.kernel_size_backbone,
+        stride_backbone = args.stride_backbone,
         num_classes_classification=len(covid_classification_dataset.class_labels),
         num_classes_cancer=len(lung_cancer_detection_dataset.diagnosis_labels)
     )
@@ -63,20 +65,13 @@ def main(args):
     # Define optimizer
     optimizer = torch.optim.Adam(model.parameters(), lr=args.learning_rate, weight_decay = args.weight_decay)
     # # TODO: ADD LEARNING RATE SCHEDULAR LATER
-
+    print(model)
     # Training loop
     for epoch in range(args.num_epochs):
         # Training
         start_time = time.time()
         train_loss, train_covid_accuracy, train_cancer_accuracy, train_covid_f1, train_cancer_f1, train_seg_iou, train_seg_dice = train(model, zip(classification_dataloader, cancer_detection_dataloader,
                                                 segmentation_dataloader), criterion, optimizer, args.device)
-        print('train_loss', train_loss)
-        print('train_covid_accuracy', train_covid_accuracy)
-        print('train_cancer_accuracy', train_cancer_accuracy)
-        print('train_covid_f1', train_covid_f1)
-        print('train_cancer_f1', train_cancer_f1)
-        print('train_seg_iou', train_seg_iou)
-        print('train_seg_dice', train_seg_dice)
 
         # Measure GPU memory usage
         gpu_memory_usage = torch.cuda.max_memory_allocated() / 1024 / 1024  # Convert to megabytes
@@ -119,7 +114,9 @@ if __name__ == '__main__':
     parser.add_argument('--num_epochs', type=int, default=10, help='Number of epochs')
     parser.add_argument('--image_size', type=int, default=256, help='Image size')
     parser.add_argument('--weighting_strategy', type=str, default='random', help='Weighting Method - [equal, uncertainty, random, dynamic, reduction]')
-    parser.add_argument('--weight_decay', type=float, default=0.0, help='weight decay for optimizer')
+    parser.add_argument('--kernel_size_backbone', type=int, default=3, help='Kernel Size for BackBone')
+    parser.add_argument('--stride_backbone', type=int, default=1, help='Strides for Backbone')
+    parser.add_argument('--weight_decay', type=float, default=0.0, help='Weight decay for optimizer')
     # for data loader
 
     parser.add_argument('--device', type=str, default='cpu' if torch.cuda.is_available() else 'cpu', help='Device (cuda or cpu)')

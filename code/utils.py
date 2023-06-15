@@ -15,12 +15,12 @@ def set_up_exp_folder(path):
     return checkpoint_dir
 
 def iou_score(pred, target):
-    intersection = torch.logical_and(pred, target).sum()
-    union = torch.logical_or(pred, target).sum()
+    intersection = torch.logical_and(pred, target).float().sum()
+    union = torch.logical_or(pred, target).float().sum()
     iou = intersection / (union + 1e-7)  # Adding a small epsilon to avoid division by zero
-    return iou.float().item()
+    return iou.item()
 
 def dice_coefficient(pred, target):
-    intersection = torch.logical_and(pred, target).sum()
-    dice = (2 * intersection) / (pred.sum() + target.sum() + 1e-7)
-    return dice.float().item()
+    intersection = torch.logical_and(pred, target).float().sum()
+    dice = (2 * intersection) / (pred.float().sum() + target.float().sum() + 1e-7)
+    return dice.item()
