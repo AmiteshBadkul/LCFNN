@@ -2,6 +2,20 @@ import torch
 import torch.nn as nn
 import random
 
+class DiceLoss(nn.Module):
+    def __init__(self):
+        super(DiceLoss, self).__init__()
+
+    def forward(self, predicted, target):
+        smooth = 1e-5  # Smoothing factor to avoid division by zero
+        intersection = torch.sum(predicted * target)
+        union = torch.sum(predicted) + torch.sum(target)
+        dice_score = (2.0 * intersection + smooth) / (union + smooth)
+        dice_loss = 1.0 - dice_score
+
+        return dice_loss
+
+
 class MultiTaskLoss(nn.Module):
     def __init__(self, task_names, weighting_strategy='equal'):
         super(MultiTaskLoss, self).__init__()
@@ -22,6 +36,7 @@ class MultiTaskLoss(nn.Module):
                 target = targets[task_name]
                 loss = loss_func(output, target)
                 losses[task_name] = loss.item()
+                #print('this loss is for {}: {}'.format(task_name, loss.item()))
                 total_loss += loss * loss_weight
 
         return total_loss, losses
@@ -33,7 +48,7 @@ class MultiTaskLoss(nn.Module):
         elif task_name == 'lung_cancer_detection':
             return nn.CrossEntropyLoss()
         elif task_name == 'lung_segmentation':
-            return nn.BCEWithLogitsLoss()
+            return DiceLoss()
 
     def calculate_loss_weights(self, outputs, targets, metric_value=None):
         loss_weights = {}
@@ -55,6 +70,9 @@ class MultiTaskLoss(nn.Module):
 
             elif self.weighting_strategy == 'reduction':
                 loss_weights = self.calculate_reduction_weights()
+
+            elif self.weighting_strategy == 'more_focus_on_seg':
+                pass
 
         return loss_weights
 
@@ -100,8 +118,8 @@ class MultiTaskLoss(nn.Module):
         reduction_weights = {}
 
         # Reduce the number of tasks for ablation studies by setting weights to zero
-        # Here, we reduce the number of tasks by setting the weight of 'lung_cancer_detection' to zero
+        # Here, we reduce the number of tasks by setting the weight of 'lung_segmentation' to zero
         for task_name in self.task_names:
-            reduction_weights[task_name] = 0.0 if task_name == 'lung_cancer_detection' else 1.0
+            reduction_weights[task_name] = 0.0 if task_name == 'lung_segmentation' else 1.0
 
         return reduction_weights

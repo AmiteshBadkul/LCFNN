@@ -1,0 +1,1 @@
+{"result_path": "../results/exp_all_three_tasks/", "batch_size": 4, "learning_rate": 0.0001, "num_epochs": 50, "image_size": 256, "weighting_strategy": "random", "kernel_size_backbone": 5, "stride_backbone": 2, "weight_decay": 0.0, "device": "cpu", "results_folder": "../results/exp_all_three_tasks//exp15-06-2023-20-35-11/"}

@@ -1,6 +1,7 @@
 import torch.optim as optim
 from sklearn.metrics import accuracy_score, f1_score
 from utils import *
+import miseval
 
 def train(model, dataloader, criterion, optimizer, device = 'cuda'):
     model.train()
@@ -67,8 +68,11 @@ def train(model, dataloader, criterion, optimizer, device = 'cuda'):
 
         # Compute segmentation IoU and Dice coefficient
         segmentation_preds = segmentation_output
-        segmentation_iou = iou_score(segmentation_preds, masks_segmentation)
-        segmentation_dice = dice_coefficient(segmentation_preds, masks_segmentation)
+        #segmentation_iou = iou_score(segmentation_preds, masks_segmentation)
+        #segmentation_dice = dice_coefficient(segmentation_preds, masks_segmentation)
+
+        segmentation_iou = miseval.evaluate(segmentation_preds.cpu().detach().numpy(), masks_segmentation.cpu().detach().numpy(), metric="IoU")
+        segmentation_dice = miseval.evaluate(segmentation_preds.cpu().detach().numpy(), masks_segmentation.cpu().detach().numpy(), metric="DSC")
 
         total_segmentation_iou += segmentation_iou * images_classification.size(0)
         total_segmentation_dice += segmentation_dice * images_classification.size(0)

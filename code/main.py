@@ -3,6 +3,7 @@ import torch
 import json
 import time
 from torch.utils.data import DataLoader
+from torch.optim.lr_scheduler import CosineAnnealingWarmRestarts
 
 ## own work
 from trainer import train, evaluate
@@ -64,7 +65,8 @@ def main(args):
 
     # Define optimizer
     optimizer = torch.optim.Adam(model.parameters(), lr=args.learning_rate, weight_decay = args.weight_decay)
-    # # TODO: ADD LEARNING RATE SCHEDULAR LATER
+    scheduler = CosineAnnealingWarmRestarts(optimizer, T_0=10, T_mult=2)
+
     print(model)
     # Training loop
     for epoch in range(args.num_epochs):
@@ -89,6 +91,7 @@ def main(args):
         train_metrics['Segmentation IoU'].append(train_seg_iou)
         train_metrics['Segmentation Dice Coeff'].append(train_seg_dice)
 
+        scheduler.step()
 
         # Evaluation
         # Perform evaluation after training full model

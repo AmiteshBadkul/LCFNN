@@ -30,8 +30,6 @@ class ResidualBlock(nn.Module):
     def should_apply_shortcut(self):
         return self.in_channels != self.out_channels
 
-from collections import OrderedDict
-
 class ResNetResidualBlock(ResidualBlock):
     def __init__(self, in_channels, out_channels, expansion=1, downsampling=1, conv=conv3x3, *args, **kwargs):
         super().__init__(in_channels, out_channels)
@@ -51,8 +49,6 @@ class ResNetResidualBlock(ResidualBlock):
     @property
     def should_apply_shortcut(self):
         return self.in_channels != self.expanded_channels
-
-from collections import OrderedDict
 
 def conv_bn(in_channels, out_channels, conv, *args, **kwargs):
     return nn.Sequential(OrderedDict({'conv': conv(in_channels, out_channels, *args, **kwargs),
@@ -139,6 +135,19 @@ class ResNetEncoder(nn.Module):
             elif isinstance(m, (nn.BatchNorm2d, nn.GroupNorm)):
                 nn.init.constant_(m.weight, 1)
                 nn.init.constant_(m.bias, 0)
+
+# ResNet Decoder
+class ResNetDecoder(nn.Module):
+    def __init__(self, in_features, n_classes):
+        super().__init__()
+        self.avg = nn.AdaptiveAvgPool2d((1, 1))
+        self.decoder = nn.Linear(in_features, n_classes)
+
+    def forward(self, x):
+        x = self.avg(x)
+        x = x.view(x.size(0), -1)
+        x = self.decoder(x)
+        return x
 
 def resnetsimple(in_channels, n_classes):
     return ResNet(in_channels, n_classes, block=ResNetBasicBlock, deepths=[1, 1, 1, 1])

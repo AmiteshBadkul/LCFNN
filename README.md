@@ -66,5 +66,6 @@ The model achieves the following performance on the test set:
 ## Notes
 
 Some notes and to-do list:
-1. Effective and correct implementation of IoU and Dice Coefficient.
+1. ~~Effective and correct implementation of IoU and Dice Coefficient.~~
 2. Weight balancing techniques.
+3. The loss function for Segmentation task oscillates which may indicate it's stuck in a local minima.

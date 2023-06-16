@@ -3,7 +3,7 @@ from torchvision import models
 import torch
 
 ## adapted work
-from resnet import resnet18
+from resnet import resnetsimple, resnet18, resnet34
 
 ## Baseline Model
 class ResNetBackbone(nn.Module):
@@ -66,17 +66,17 @@ class LungCancerDetectionHead(nn.Module):
 class LungSegmentationModel(nn.Module):
     def __init__(self, input_height, input_width, in_channels, num_classes = 1):
         super(LungSegmentationModel, self).__init__()
-        self.upsample = nn.Upsample(size=(input_height, input_width), mode='bilinear', align_corners=True)
-        self.conv = nn.Conv2d(2048, num_classes, kernel_size=1)
+        self.upsample = nn.Upsample(size = (input_height, input_width), mode = 'bilinear', align_corners = True)
+        self.conv = nn.Conv2d(2048, num_classes, kernel_size = 1)
         self.activation = nn.Sigmoid()
+        self.threshold = 0.5
 
     def forward(self, x):
         upsampled_features = self.upsample(x)
         mask = self.conv(upsampled_features)
-        #threshold = 0.5
-        #binary_mask = (mask > threshold).float()
         mask = self.activation(mask)
-        return mask
+        binary_mask = (mask > self.threshold).float()
+        return binary_mask.float()
 
 class LungSegmentationModel2(nn.Module):
     """
@@ -132,7 +132,6 @@ class ResNetModularBackbone(nn.Module):
         x = self.backbone(x)
         x = self.conv(x)
         return x
-
 
 class MultiTaskModel(nn.Module):
     def __init__(self, input_height, input_width, in_channels, kernel_size_backbone, stride_backbone, num_classes_classification, num_classes_cancer):

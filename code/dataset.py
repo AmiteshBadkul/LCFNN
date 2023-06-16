@@ -84,7 +84,11 @@ class LungSegmentationDataset(Dataset):
         mask = self.transform(mask)
         mask = ToTensor()(mask)
 
-        return image, mask
+        # Apply thresholding to obtain a binary mask
+        threshold = 0.5  # Adjust the threshold as needed
+        mask = torch.where(mask > threshold, torch.tensor(1), torch.tensor(0))
+
+        return image, mask.float()
 
 def create_multitask_dataloader(classification_dataset, cancer_detection_dataset, segmentation_dataset, batch_size):
     classification_dataloader = DataLoader(classification_dataset, batch_size=batch_size, shuffle=True)
@@ -110,57 +114,3 @@ def collate_fn_combined(batch):
     )
 
     return combined_batch
-
-"""
-# Set the root directories and file paths for each dataset
-covid_classification_root = '../datasets/COVID19Classification'
-lung_cancer_detection_root = '../datasets/LungCancerDetection'
-lung_segmentation_image_dir = '../datasets/LungSegmentation/CXR_png/common_images/'
-lung_segmentation_mask_dir = '../datasets/LungSegmentation/masks/common_masks/'
-lung_cancer_metadata_file = '../datasets/LungCancerDetection/jsrt_metadata.csv'
-
-# Set the desired image size for resizing
-image_size = (256, 256)
-batch_size = 1
-
-# Create the datasets
-covid_classification_dataset = COVID19ClassificationDataset(covid_classification_root, image_size)
-lung_cancer_detection_dataset = LungCancerDetectionDataset(lung_cancer_detection_root, lung_cancer_metadata_file, image_size)
-lung_segmentation_dataset = LungSegmentationDataset(lung_segmentation_image_dir, lung_segmentation_mask_dir, image_size)
-
-classification_dataloader = DataLoader(covid_classification_dataset, batch_size=batch_size, shuffle=True)
-cancer_detection_dataloader = DataLoader(lung_cancer_detection_dataset, batch_size=batch_size, shuffle=True)
-segmentation_dataloader = DataLoader(lung_segmentation_dataset, batch_size=batch_size, shuffle=True)
-
-# Initialize the model
-model = MultiTaskModel(
-    input_height=image_size[0],
-    input_width=image_size[1],
-    in_channels=3,  # Assuming RGB images
-    num_classes_classification=len(covid_classification_dataset.class_labels),
-    num_classes_cancer=len(lung_cancer_detection_dataset.diagnosis_labels)
-)
-
-
-for classification_batch, cancer_detection_batch, segmentation_batch in zip(classification_dataloader, cancer_detection_dataloader, segmentation_dataloader):
-    images_classification, labels_classification = classification_batch
-    images_cancer_detection, labels_cancer_detection = cancer_detection_batch
-    images_segmentation, masks_segmentation = segmentation_batch
-
-    # Perform your multi-task learning operations here
-    # ...
-
-    # For example, print the shapes of the batches
-    print("Classification Batch - Images:", images_classification.shape)
-    print("Classification Batch - Labels:", labels_classification.shape)
-    print("Cancer Detection Batch - Images:", images_cancer_detection.shape)
-    print("Cancer Detection Batch - Labels:", labels_cancer_detection.shape)
-    print("Segmentation Batch - Images:", images_segmentation.shape)
-    print("Segmentation Batch - Masks:", masks_segmentation.shape)
-
-    cov_out, cancer_out, seg_out = model(images_classification, images_cancer_detection, images_segmentation)
-    print("Classification Batch - Output:", cov_out.shape)
-    print("Cancer Detection Batch - Images:", cancer_out.shape)
-    print("Segmentation Batch - Images:", seg_out.shape)
-    break
-"""
